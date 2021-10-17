@@ -4,10 +4,14 @@
     <div class="container-fluid mt-4">
       <!-- Control the column width, and how they should appear on different devices -->
       <div class="row">
-        <div class="col-sm-4"></div>
+        <div class="col-sm-4">
+          <router-link class="mx-3" to="/cupom-promocional">
+            voltar
+          </router-link>
+        </div>
 
         <div class="col-sm-4">
-          <h2 class="text-center mb-3">Cadastrar Cupom</h2>
+          <h2 class="text-center mb-3">cadastrar Cupom</h2>
           <form @submit.prevent="salvarCupom()">
             <div class="mb-3">
               <label>Nome</label>
@@ -75,6 +79,7 @@ import Navbar from "../components/nav/Nav.vue";
 
 export default {
   name: "CadastroCupom",
+
   components: {
     "app-nav": Navbar,
   },
@@ -107,8 +112,10 @@ export default {
         .then((response) => response.json())
         .then((data) => {
           alert(data.mensagens);
-        })
-        .then(() => {});
+          if (data.mensagens[0] == "Cupom salvo com sucesso") {
+            this.$router.push({ path: "/cupom-promocional" });
+          }
+        });
     },
     formatarDinheiro() {
       let valor = this.cupom.valor;
