@@ -46,6 +46,7 @@ export default {
     exluirCookies() {
       localStorage.removeItem("login");
       localStorage.removeItem("admin");
+      localStorage.removeItem("idCupom");
     },
   },
 };
