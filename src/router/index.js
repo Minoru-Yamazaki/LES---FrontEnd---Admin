@@ -4,6 +4,8 @@ import Login from "../views/Login.vue";
 import CupomPromocional from "../views/CupomPromocional.vue";
 import CadastroCupom from "../views/CadastroCupom.vue";
 import AlterarCupom from "../views/CupomAlterar.vue";
+import Pedidos from "../views/Pedidos.vue";
+import PedidoDetalhes from "../views/PedidoDetalhes.vue";
 
 const routes = [
   { path: "/", name: "Login", component: Login },
@@ -11,6 +13,8 @@ const routes = [
   { path: "/cupom-promocional", component: CupomPromocional },
   { path: "/cadastro-cupom", component: CadastroCupom },
   { path: "/alterar-cupom/:id", component: AlterarCupom, props: true },
+  { path: "/pedidos", component: Pedidos },
+  { path: "/pedidos/detalhes/:id", component: PedidoDetalhes, props: true },
 ];
 
 const router = createRouter({
