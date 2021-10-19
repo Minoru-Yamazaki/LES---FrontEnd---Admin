@@ -19,13 +19,13 @@
       </router-link>
     </div>
     <div>
-      <router-link class="text-secondary h4" to="">
+      <router-link class="text-secondary h4" to="/pedidos">
         <p class="fa fa-box-open"></p>
         <i class="ml-2">pedidos</i>
       </router-link>
     </div>
     <div>
-      <router-link class="text-secondary h4" to="/minha-conta/alterar-senha">
+      <router-link class="text-secondary h4" to="">
         <p class="fa fa-lock"></p>
         <i class="ml-2">alterar senha</i>
       </router-link>
