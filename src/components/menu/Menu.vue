@@ -13,6 +13,12 @@
       </router-link>
     </div>
     <div>
+      <router-link class="text-secondary h4" to="/dashboard">
+        <p class="fas fa-chart-line"></p>
+        <i class="ml-2">dashboard</i>
+      </router-link>
+    </div>
+    <div>
       <router-link class="text-secondary h4" to="/cupom-promocional">
         <p class="fa fa-ticket-alt"></p>
         <i class="ml-2">cupom promocional</i>

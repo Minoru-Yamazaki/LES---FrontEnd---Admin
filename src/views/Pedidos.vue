@@ -108,6 +108,7 @@
             <thead>
               <tr>
                 <th scope="col">Status</th>
+                <th scope="col">Alterar para</th>
                 <th scope="col">Data</th>
                 <th scope="col">Valor</th>
                 <th scope="col"></th>
@@ -117,8 +118,22 @@
             <tbody>
               <tr v-for="pedido in pedidos" :key="pedido.id">
                 <td>{{ pedido.status }}</td>
+                <td>
+                  <select
+                    class="form-control"
+                    v-model="statusTemporario[pedidos.indexOf(pedido)]"
+                    v-if="getStatus(pedido.status)"
+                  >
+                    <option
+                      v-for="status in getStatus(pedido.status)"
+                      :key="status"
+                    >
+                      {{ status }}
+                    </option>
+                  </select>
+                </td>
                 <td>{{ pedido.data }}</td>
-                <td>R$ {{ pedido.valor }}</td>
+                <td>R$ {{ pedido.valor + pedido.frete }}</td>
                 <td>
                   <router-link :to="{ path: '/pedidos/detalhes/' + pedido.id }">
                     ver compra
@@ -127,32 +142,81 @@
 
                 <td>
                   <button
-                    v-if="verificaStatus(pedido.status, 'aceitar')"
-                    type="button"
-                    class="btn btn-success"
+                    v-if="verificaStatus(pedido.status)"
+                    class="btn btn-primary"
+                    v-on:click="alterarStatusCompra(pedidos.indexOf(pedido))"
                   >
-                    aceitar
+                    Alterar
                   </button>
                   <button
-                    v-if="verificaStatus(pedido.status, 'recusar')"
-                    type="button"
-                    class="btn btn-danger ml-3"
-                    v-on:click="alterarStatus(pedido)"
+                    v-if="pedido.status == 'Troca autorizada'"
+                    class="btn btn-primary"
+                    v-on:click="modal(pedido, pedidos.indexOf(pedido))"
                   >
-                    recusar
-                  </button>
-                  <button
-                    v-if="verificaStatus(pedido.status, 'alterar')"
-                    type="button"
-                    class="btn btn-warning"
-                    v-on:click="alterarStatus(pedido)"
-                  >
-                    alterar status
+                    Alterar
                   </button>
                 </td>
               </tr>
             </tbody>
           </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div id="myModal" class="modal">
+        <!-- Modal content -->
+        <div class="row mt-5">
+          <div class="col-sm-3 ml-4 mt-4"></div>
+          <div class="col-sm-5">
+            <div class="modal-content">
+              <span class="close text-right" v-on:click="fechar()"
+                >&times;</span
+              >
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th scope="col">Nome</th>
+                    <th scope="col">Qtde.</th>
+                    <th scope="col">Retornar ao estoque?</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="troca in pedido.trocas" :key="troca.id">
+                    <td>{{ getNomeProduto(troca.proId) }}</td>
+                    <td>{{ troca.quantidade }}</td>
+                    <td>
+                      <input
+                        class="ml-2"
+                        type="radio"
+                        value="true"
+                        v-model="troca.retornarEstoque"
+                      />
+                      <label class="ml-2 mr-2" for="celular">sim</label>
+                      <input
+                        class="ml-2"
+                        type="radio"
+                        value="false"
+                        v-model="troca.retornarEstoque"
+                      />
+                      <label class="ml-2" for="celular">não</label>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <div class="row">
+                <div class="col-sm-8"></div>
+                <div class="col-sm-4">
+                  <button
+                    class="btn btn-success form-control"
+                    v-on:click="alterarCompra(pedido, statusTroca)"
+                  >
+                    Salvar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -189,19 +253,20 @@ export default {
         "Separando pedido",
         "Enviado p/ transportadora",
         "Em trânsito",
-        "entregue",
-        "troca solicitada",
-        "troca autorizada",
-        "troca rejeitada",
-        "troca aceita",
-        "troca efetuada",
-        "cancelamento solicitado",
-        "cancelamento rejeitado",
-        "cancelamento aceito",
-        "cancelamento efetuado",
+        "Entregue",
+        "Troca solicitada",
+        "Troca autorizada",
+        "Troca rejeitada", //"Troca aceita",
+        "Troca efetuada",
+        "Cancelamento solicitado",
+        "Cancelamento rejeitado",
+        "Cancelamento aceito",
+        "Cancelamento efetuado",
       ],
-      pedidos: null,
-
+      pedidos: [{ status: "" }],
+      statusTemporario: [],
+      statusTroca: null, //Usado no modal
+      vetor: [],
       estados: [
         "AC",
         "AL",
@@ -231,6 +296,7 @@ export default {
         "SE",
         "TO",
       ],
+      pedido: { trocas: [] },
     };
   },
   created() {
@@ -242,10 +308,12 @@ export default {
         compra = {
           ativo: 1,
         };
+      } else {
+        if (compra.valor != null) {
+          this.formatarDinheiro();
+        }
       }
-      if (compra.valor != null) {
-        this.formatarDinheiro();
-      }
+
       const postMethod = {
         method: "POST", // Method itself
         headers: {
@@ -258,11 +326,18 @@ export default {
         .then((response) => response.json())
         .then((data) => {
           if (data[0].id != null) {
+            console.log(data);
             this.pedidos = data;
+            this.preencheVetor();
           } else {
             alert(data[0].mensagens);
           }
         });
+    },
+    preencheVetor() {
+      for (const pedido of this.pedidos) {
+        this.statusTemporario.push(pedido.status);
+      }
     },
     limparPesquisa() {
       this.compra.id = null;
@@ -282,69 +357,191 @@ export default {
       this.compra.valor = valor.replace(",", ".");
     },
     alterarStatus(pedido) {
-      if (pedido.status == "Em trânsito") {
-        pedido.status = "Entregue";
-      }
-      if (pedido.status == "Enviado p/ transportadora") {
-        pedido.status = "Em trânsito";
-      }
-      if (pedido.status == "Separando pedido") {
-        pedido.status = "Enviado p/ transportadora";
-      }
-      if (
-        pedido.status == "Aprovada" ||
-        pedido.status == "Cancelamento rejeitado" ||
-        pedido.status == "Troca rejeitada"
-      ) {
-        pedido.status = "Separando pedido";
-      }
-      if (pedido.status == "Cancelamento solicitado") {
-        pedido.status = "Cancelamento rejeitado";
-      }
-      if (pedido.status == "Troca solicitada") {
-        pedido.status = "Troca rejeitada";
-      }
+      const resposta = confirm("Recusar troca?");
 
-      this.alterarCompra(pedido);
+      if (resposta) {
+        if (pedido.status == "Cancelamento solicitado") {
+          pedido.status = "Cancelamento rejeitado";
+        }
+        if (pedido.status == "Troca solicitada") {
+          pedido.status = "Troca rejeitada";
+        }
+      }
     },
 
-    alterarCompra(compra) {
-      const postMethod = {
-        method: "POST", // Method itself
-        headers: {
-          "Content-type": "application/json; charset=UTF-8", // Indicates the content
-        },
-        body: JSON.stringify(compra), // We send data in JSON format
-      };
+    alterarStatusCompra(index) {
+      const statusDiferente =
+        this.pedidos[index].status != this.statusTemporario[index]
+          ? true
+          : false;
 
-      fetch("http://localhost:8080/alterar-compra", postMethod)
-        .then((response) => response.json())
-        .then((data) => {
-          alert(data.mensagens[0]);
-        });
+      if (statusDiferente && this.statusTemporario[index]) {
+        const resposta = confirm(
+          "Alterar de: '" +
+            this.pedidos[index].status +
+            "'\npara: '" +
+            this.statusTemporario[index] +
+            "' ?"
+        );
+
+        if (resposta) {
+          this.pedidos[index].status = this.statusTemporario[index];
+
+          const postMethod = {
+            method: "POST", // Method itself
+            headers: {
+              "Content-type": "application/json; charset=UTF-8", // Indicates the content
+            },
+            body: JSON.stringify(this.pedidos[index]), // We send data in JSON format
+          };
+
+          fetch("http://localhost:8080/alterar-compra", postMethod)
+            .then((response) => response.json())
+            .then((data) => {
+              alert(data.mensagens[0]);
+            });
+        }
+      }
+    },
+    alterarCompra(compra, status) {
+      this.fechar();
+
+      const resposta = confirm(
+        "Alterar de: '" + compra.status + "'\npara: '" + status + "' ?"
+      );
+      if (resposta) {
+        compra.status = status;
+
+        const postMethod = {
+          method: "POST", // Method itself
+          headers: {
+            "Content-type": "application/json; charset=UTF-8", // Indicates the content
+          },
+          body: JSON.stringify(compra), // We send data in JSON format
+        };
+
+        fetch("http://localhost:8080/alterar-compra", postMethod)
+          .then((response) => response.json())
+          .then((data) => {
+            alert(data.mensagens[0]);
+          });
+      }
+    },
+    getCompra(id) {
+      for (const pedido of this.pedidos) {
+        if (pedido.id == id) {
+          return pedido;
+        }
+      }
+    },
+    verificaStatus(status) {
+      if (
+        status == "Entregue" ||
+        status == "Troca autorizada" ||
+        status == "Troca efetuada" ||
+        status == "Troca rejeitada"
+      ) {
+        return false;
+      }
+      return true;
+    },
+    getStatus(status) {
+      if (
+        status == "Separando pedido" ||
+        status == "Enviado p/ transportadora" ||
+        status == "Em trânsito" ||
+        status == "Aprovada"
+      ) {
+        return [
+          "Aprovada",
+          "Separando pedido",
+          "Enviado p/ transportadora",
+          "Em trânsito",
+          "Entregue",
+        ];
+      }
+      if (
+        status == "Entregue" ||
+        status == "Troca efetuada" ||
+        status == "Troca rejeitada"
+      ) {
+        return 0;
+      }
+      if (status == "Troca solicitada") {
+        return ["Troca solicitada", "Troca autorizada", "Troca rejeitada"];
+      }
+      if (status == "Troca autorizada") {
+        return ["Troca efetuada"];
+      }
+      return [
+        "Cancelamento solicitado",
+        "Cancelamento rejeitado",
+        "Cancelamento aceito",
+        "Cancelamento efetuado",
+      ];
     },
 
-    verificaStatus(status, acao) {
-      if (
-        (acao == "aceitar" || acao == "recusar") &&
-        (status == "Troca solicitada" || status == "Cancelamento solicitado")
-      ) {
-        return 1;
-      }
+    //Modal
+    modal(compra, index) {
+      this.pedido = compra;
+      this.statusTroca = this.statusTemporario[index];
 
-      if (
-        acao == "alterar" &&
-        (status == "Separando pedido" ||
-          status == "Enviado p/ transportadora" ||
-          status == "Em trânsito" ||
-          status == "Aprovada" ||
-          status == "Cancelamento rejeitado" ||
-          status == "Troca rejeitada" )
-      ) {
-        return 1;
+      if (compra.status != this.statusTroca) {
+        let modal = document.getElementById("myModal");
+        modal.style.display = "block";
       }
-      return 0;
+    },
+    fechar() {
+      let modal = document.getElementById("myModal");
+      modal.style.display = "none";
+    },
+    getNomeProduto(id) {
+      for (const produto of this.pedido.produtos) {
+        if (produto.idProduto == id) {
+          return produto.nome;
+        }
+      }
     },
   },
 };
 </script>
+
+<style>
+/* The Modal (background) */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0, 0, 0); /* Fallback color */
+  background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
+}
+
+/* Modal Content/Box */
+.modal-content {
+  background-color: #fefefe;
+  margin: 15% auto; /* 15% from the top and centered */
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%; /* Could be more or less, depending on screen size */
+}
+
+/* The Close Button */
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+</style>

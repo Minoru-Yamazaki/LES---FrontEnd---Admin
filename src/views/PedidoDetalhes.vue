@@ -33,6 +33,29 @@
           </table>
         </div>
       </div>
+      <div class="row" v-if="compra.trocas.length">
+        <div class="col-sm-1"></div>
+        <div class="col-sm-10">
+          <h1>Trocas</h1>
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Código do produto</th>
+                <th scope="col">Nome</th>
+                <th scope="col">Quantidade</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="troca in compra.trocas" :key="troca.id">
+                <td>{{ troca.proId }}</td>
+                <td>{{ getNomeProduto(troca.proId) }}</td>
+                <td>{{ troca.quantidade }}</td>
+               
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -51,7 +74,8 @@ export default {
   data() {
     return {
       compra: {
-          produtos: [],
+        produtos: [],
+        trocas: [],
       },
     };
   },
@@ -84,6 +108,13 @@ export default {
             alert(data[0].mensagens);
           }
         });
+    },
+    getNomeProduto(id) {
+      for (const produto of this.compra.produtos) {
+        if (produto.idProduto == id) {
+          return produto.nome;
+        }
+      }
     },
   },
 };

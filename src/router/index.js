@@ -6,6 +6,7 @@ import CadastroCupom from "../views/CadastroCupom.vue";
 import AlterarCupom from "../views/CupomAlterar.vue";
 import Pedidos from "../views/Pedidos.vue";
 import PedidoDetalhes from "../views/PedidoDetalhes.vue";
+import Dashboard from "../views/Dashboard.vue";
 
 const routes = [
   { path: "/", name: "Login", component: Login },
@@ -15,6 +16,7 @@ const routes = [
   { path: "/alterar-cupom/:id", component: AlterarCupom, props: true },
   { path: "/pedidos", component: Pedidos },
   { path: "/pedidos/detalhes/:id", component: PedidoDetalhes, props: true },
+  { path: "/dashboard", component: Dashboard },
 ];
 
 const router = createRouter({
