@@ -1,6 +1,23 @@
 <template>
   <div>
     <div>
+      <router-link
+        class="text-secondary h4"
+        to="/cadastro-orquidea"
+        id="lnkCadastrar"
+      >
+        <p class="fas fa-leaf"></p>
+        <i class="ml-2">cadastro orquídea</i>
+      </router-link>
+    </div>
+    <div>
+      <router-link class="text-secondary h4" to="/orquideas">
+        <p class="fab fa-pagelines"></p>
+        <i class="ml-2">orquídeas</i>
+      </router-link>
+    </div>
+    <!-- 
+    <div>
       <router-link class="text-secondary h4" to="">
         <p class="fas fa-user-plus"></p>
         <i class="ml-2">novo usuário</i>
@@ -12,8 +29,9 @@
         <i class="ml-2">usuários</i>
       </router-link>
     </div>
+    -->
     <div>
-      <router-link class="text-secondary h4" to="/dashboard">
+      <router-link class="text-secondary h4" to="/dashboard" id="lnkDashBoard">
         <p class="fas fa-chart-line"></p>
         <i class="ml-2">dashboard</i>
       </router-link>
@@ -30,6 +48,7 @@
         <i class="ml-2">pedidos</i>
       </router-link>
     </div>
+    <!--
     <div>
       <router-link class="text-secondary h4" to="">
         <p class="fa fa-lock"></p>
@@ -46,6 +65,7 @@
         <i class="h4">excluir cadastro</i>
       </button>
     </div>
+    -->
   </div>
 </template>
 
@@ -61,7 +81,7 @@ export default {
 
   methods: {
     excluirCadastro() {
-      const resposta = confirm("Escluir cadastro?");
+      const resposta = confirm("Excluir cadastro?");
 
       if (resposta == true) {
         let cliente = JSON.parse(localStorage.getItem("cliente"));

@@ -80,7 +80,7 @@
             </div>
             <div class="col-sm-2 mb-3">
               <label class="text-white">texto cor branca</label>
-              <button type="submit" class="btn btn-primary btn-block">
+              <button type="submit" class="btn btn-primary btn-block" id="pesquisarCompra">
                 <i class="fas fa-search"></i>
                 Pesquisar
               </button>

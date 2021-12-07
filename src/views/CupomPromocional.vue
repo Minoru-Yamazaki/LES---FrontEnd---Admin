@@ -161,7 +161,7 @@ export default {
       this.consultarCupom();
     },
     excluirCupom(id) {
-      const resposta = confirm("Escluir esse cupom?");
+      const resposta = confirm("Excluir esse cupom?");
 
       if (resposta == true) {
         const json = {

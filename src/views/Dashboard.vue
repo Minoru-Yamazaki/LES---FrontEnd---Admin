@@ -12,7 +12,6 @@
               type="date"
               id="dataInicial"
               v-model="analise.dataInicial"
-              timezone="[[timezone]]"
               required
             />
           </div>
@@ -23,19 +22,26 @@
               type="date"
               id="dataFinal"
               v-model="analise.dataFinal"
-              timezone="[[timezone]]"
               required
             />
           </div>
           <div class="col-sm-4">
             <label class="text-white">Texto em cor branca</label>
-            <button type="submit" class="btn btn-primary btn-block">
+            <button
+              type="submit"
+              class="btn btn-primary btn-block"
+              id="pesquisar"
+            >
               Pesquisar
             </button>
           </div>
         </div>
       </form>
-      <highcharts :options="chartOptions" :callback="myCallback"></highcharts>
+      <highcharts
+        :options="chartOptions"
+        :callback="myCallback"
+        id="dashboard"
+      ></highcharts>
     </div>
   </div>
 </template>
@@ -116,7 +122,6 @@ export default {
       fetch("http://localhost:8080/consultar-analise", postMethod)
         .then((response) => response.json())
         .then((data) => {
-          console.log(data);
           this.chartOptions = data;
         });
     },

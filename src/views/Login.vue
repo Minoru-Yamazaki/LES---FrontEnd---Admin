@@ -23,6 +23,7 @@
               <input
                 class="form-control"
                 type="email"
+                id="txtEmail"
                 placeholder="minoru@gmail.com"
                 required
                 v-model="login.email"
@@ -33,12 +34,13 @@
               <input
                 class="form-control"
                 type="password"
+                id="txtPwd"
                 required
                 v-model="login.senha"
               />
             </div>
 
-            <button type="submit" class="btn btn-primary btn-block mb-5">
+            <button type="submit" class="btn btn-primary btn-block mb-5" id="btnContinuar">
               <!-- v-on:click="teste()" -->
               Continuar
             </button>
